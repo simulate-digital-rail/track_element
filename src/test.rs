@@ -32,15 +32,15 @@ fn set_signal() {
 
 #[test]
 fn set_basic_driveway() {
-    let p1 = Arc::new(RwLock::new(Point::new(PointState::Left, "P1".to_string())));
-    let p2 = Arc::new(RwLock::new(Point::new(PointState::Left, "P2".to_string())));
-    let s = Arc::new(RwLock::new(Signal::new(
+    let p1 = Point::new_arc(PointState::Left, "P1".to_string());
+    let p2 = Point::new_arc(PointState::Left, "P2".to_string());
+    let s = Signal::new_arc(
         SignalState::default(),
         SupportedSignalStates::default()
             .main(&mut vec![MainSignalState::Hp0, MainSignalState::Ks1]),
         "S".to_string(),
         None,
-    )));
+    );
 
     let ts = DrivewayState::new(
         vec![
@@ -64,34 +64,34 @@ fn set_basic_driveway() {
 
 #[test]
 fn set_conflicting_driveway() {
-    let s1 = Arc::new(RwLock::new(Signal::new(
+    let s1 = Signal::new_arc(
         (MainSignalState::Hp0).into(),
         SupportedSignalStates::default()
             .main(&mut vec![MainSignalState::Hp0, MainSignalState::Ks1]),
         "A".to_string(),
         None,
-    )));
-    let s2 = Arc::new(RwLock::new(Signal::new(
+    );
+    let s2 = Signal::new_arc(
         (MainSignalState::Hp0).into(),
         SupportedSignalStates::default()
             .main(&mut vec![MainSignalState::Hp0, MainSignalState::Ks1]),
         "B".to_string(),
         None,
-    )));
-    let s12 = Arc::new(RwLock::new(Signal::new(
+    );
+    let s12 = Signal::new_arc(
         (MainSignalState::Hp0).into(),
         SupportedSignalStates::default()
             .main(&mut vec![MainSignalState::Hp0, MainSignalState::Ks1]),
         "C".to_string(),
         None,
-    )));
-    let s22 = Arc::new(RwLock::new(Signal::new(
+    );
+    let s22 = Signal::new_arc(
         (MainSignalState::Hp0).into(),
         SupportedSignalStates::default()
             .main(&mut vec![MainSignalState::Hp0, MainSignalState::Ks1]),
         "D".to_string(),
         None,
-    )));
+    );
 
     let dw1 = Arc::new(RwLock::new(Driveway::new(
         Vec::new(),
