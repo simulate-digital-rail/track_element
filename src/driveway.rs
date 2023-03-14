@@ -316,4 +316,17 @@ impl DrivewayManager {
             }
         }
     }
+
+    pub fn is_allocated(&self, vacancy_section: &VacancySection) -> bool {
+        if let Some(driveway) = self.driveways.values().find(|dw| {
+            let dw = dw.read().unwrap();
+            let vs = dw.target_state.vacancy_sections();
+            vs.iter()
+                .any(|(v, _)| v.read().unwrap().id() == vacancy_section.id())
+        }) {
+            driveway.read().unwrap().is_set()
+        } else {
+            false
+        }
+    }
 }
