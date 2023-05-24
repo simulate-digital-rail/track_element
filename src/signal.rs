@@ -235,8 +235,13 @@ impl Signal {
         supported_states: SupportedSignalStates,
         id: String,
         name: Option<String>,
-    ) -> Arc<RwLock<Self>> {
-        Arc::new(RwLock::new(Self::new(state, supported_states, id, name)))
+    ) -> Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>> {
+        Arc::new(RwLock::new(Box::new(Self::new(
+            state,
+            supported_states,
+            id,
+            name,
+        ))))
     }
 
     pub fn reset(&mut self) {
@@ -246,6 +251,10 @@ impl Signal {
     pub fn name(&self) -> &str {
         self.name.as_deref().unwrap_or(self.id()).trim()
     }
+}
+
+pub trait GenericSignal: TrackElement<State = SignalState> {
+    fn name(&self) -> &str;
 }
 
 impl TrackElement for Signal {
@@ -267,5 +276,11 @@ impl TrackElement for Signal {
         } else {
             Err(TrackElementError::InvalidMainSignalState(new_state.main))
         }
+    }
+}
+
+impl GenericSignal for Signal {
+    fn name(&self) -> &str {
+        self.name()
     }
 }

@@ -3,24 +3,32 @@ use std::iter::Iterator;
 use std::sync::Arc;
 use std::sync::RwLock;
 
+use crate::point::GenericPoint;
+use crate::signal::GenericSignal;
 use crate::{
-    point::{Point, PointState},
-    signal::{Signal, SignalState},
+    point::PointState,
+    signal::SignalState,
     vacancy_section::{VacancySection, VacancySectionState},
 };
 use crate::{TrackElement, TrackElementError};
 
+type PointStates = Vec<(Arc<RwLock<Box<dyn GenericPoint + Send + Sync>>>, PointState)>;
+type SignalStates = Vec<(
+    Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>>,
+    SignalState,
+)>;
+
 #[derive(Debug, Clone)]
 pub struct DrivewayState {
-    points: Vec<(Arc<RwLock<Point>>, PointState)>,
-    signals: Vec<(Arc<RwLock<Signal>>, SignalState)>,
+    points: PointStates,
+    signals: SignalStates,
     vacancy_sections: Vec<(Arc<RwLock<VacancySection>>, VacancySectionState)>,
 }
 
 impl DrivewayState {
     pub fn new(
-        points: Vec<(Arc<RwLock<Point>>, PointState)>,
-        signals: Vec<(Arc<RwLock<Signal>>, SignalState)>,
+        points: PointStates,
+        signals: SignalStates,
         vacancy_sections: Vec<(Arc<RwLock<VacancySection>>, VacancySectionState)>,
     ) -> Self {
         Self {
@@ -42,9 +50,12 @@ impl DrivewayState {
             .map(|(elem, state)| elem.write().unwrap().set_state(*state))
             .any(|r| r.is_err())
         {
-            self.signals
-                .iter()
-                .for_each(|(elem, _)| elem.write().unwrap().reset())
+            self.signals.iter().for_each(|(elem, _)| {
+                elem.write()
+                    .unwrap()
+                    .reset()
+                    .expect("Reset should not fail");
+            });
         }
 
         for (section, state) in &self.vacancy_sections {
@@ -61,11 +72,16 @@ impl DrivewayState {
         self
     }
 
-    pub fn points(&self) -> &[(Arc<RwLock<Point>>, PointState)] {
+    pub fn points(&self) -> &[(Arc<RwLock<Box<dyn GenericPoint + Send + Sync>>>, PointState)] {
         self.points.as_ref()
     }
 
-    pub fn signals(&self) -> &[(Arc<RwLock<Signal>>, SignalState)] {
+    pub fn signals(
+        &self,
+    ) -> &[(
+        Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>>,
+        SignalState,
+    )] {
         self.signals.as_ref()
     }
 
@@ -87,21 +103,20 @@ impl PartialEq for DrivewayState {
     }
 }
 
-#[derive(Debug)]
 pub struct Driveway {
     conflicting_driveways: Vec<Arc<RwLock<Driveway>>>,
     is_set: bool,
     target_state: DrivewayState,
-    start_signal: Arc<RwLock<Signal>>,
-    end_signal: Arc<RwLock<Signal>>,
+    start_signal: Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>>,
+    end_signal: Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>>,
 }
 
 impl Driveway {
     pub fn new(
         conflicting_driveways: Vec<Arc<RwLock<Driveway>>>,
         expected_state: DrivewayState,
-        start_signal: Arc<RwLock<Signal>>,
-        end_signal: Arc<RwLock<Signal>>,
+        start_signal: Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>>,
+        end_signal: Arc<RwLock<Box<dyn GenericSignal + Send + Sync>>>,
     ) -> Self {
         Self {
             conflicting_driveways,
@@ -178,10 +193,6 @@ impl Driveway {
             .iter()
             .any(|d| d.read().unwrap().is_set())
     }
-
-    pub fn set_conflicting_driveways(&mut self, driveways: &mut Vec<Arc<RwLock<Driveway>>>) {
-        self.conflicting_driveways.append(driveways);
-    }
 }
 
 pub struct DrivewayManager {
@@ -209,7 +220,7 @@ impl DrivewayManager {
             .collect()
     }
 
-    pub fn get_point_state(&self, _element: &str) -> Result<PointState, TrackElementError> {
+    pub fn get_point_state(&self, element: &str) -> Result<PointState, TrackElementError> {
         todo!()
     }
 

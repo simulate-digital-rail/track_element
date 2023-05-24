@@ -1,22 +1,19 @@
-use std::sync::Arc;
-use std::sync::RwLock;
 use track_element::{
     driveway::{Driveway, DrivewayState},
     point::{Point, PointState},
     signal::{MainSignalState, Signal, SignalState, SupportedSignalStates},
-    TrackElement,
 };
 
 fn main() {
-    let p1 = Arc::new(RwLock::new(Point::new(PointState::Left, "P1".to_string())));
-    let p2 = Arc::new(RwLock::new(Point::new(PointState::Left, "P2".to_string())));
-    let s = Arc::new(RwLock::new(Signal::new(
+    let p1 = Point::new_arc(PointState::Left, "P1".to_string());
+    let p2 = Point::new_arc(PointState::Left, "P2".to_string());
+    let s = Signal::new_arc(
         SignalState::default(),
         SupportedSignalStates::default()
             .main(&mut vec![MainSignalState::Hp0, MainSignalState::Ks1]),
         "S".to_string(),
         None,
-    )));
+    );
 
     let ts = DrivewayState::new(
         vec![

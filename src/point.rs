@@ -2,16 +2,11 @@ use std::sync::{Arc, RwLock};
 
 use crate::{TrackElement, TrackElementError};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PointState {
+    #[default]
     Left,
     Right,
-}
-
-impl Default for PointState {
-    fn default() -> Self {
-        PointState::Left
-    }
 }
 
 #[derive(Debug)]
@@ -25,10 +20,17 @@ impl Point {
         Self { state, id }
     }
 
-    pub fn new_arc(state: PointState, id: String) -> Arc<RwLock<Self>> {
-        Arc::new(RwLock::new(Self::new(state, id)))
+    pub fn new_arc(
+        state: PointState,
+        id: String,
+    ) -> Arc<RwLock<Box<dyn GenericPoint + Send + Sync>>> {
+        Arc::new(RwLock::new(Box::new(Self::new(state, id))))
     }
 }
+
+pub trait GenericPoint: TrackElement<State = PointState> {}
+
+impl GenericPoint for Point {}
 
 impl TrackElement for Point {
     type State = PointState;
