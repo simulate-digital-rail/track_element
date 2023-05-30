@@ -1,0 +1,99 @@
+version: '2'
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.152.1.0/24
+          gateway: 10.152.1.1
+
+services:
+  interlocking:
+    image: reg.osmhpi.de/iotlab/simulators/interlocking:main-8d9f4662ca03b4e1964b728e0c443ee60c3a7329
+    command: ["0.0.0.0:50051", "INTERLOCKING", "SIGNAL"]
+    hostname: interlocking
+    ports:
+      - 5000:80
+      - 5022:2222
+    networks:
+      default:
+        ipv4_address: 10.152.1.10
+
+  interlocking_bridge:
+    network_mode: service:interlocking
+    image: reg.osmhpi.de/iotlab/rasta-bridge-uni-passau:rasta-bridge-5030b6689b532609942e51dffd544c72d424ab8c
+    entrypoint: []
+    command: ["sh", "-c", "while true; do ./entrypoint ; done"]
+    environment:
+      - AKRI_RASTA_CRC_CODE=NO_CHECKSUM
+      - AKRI_RASTA_HOST=10.152.1.20
+      - AKRI_RASTA_LOCAL_PORT_CHANNEL0=9998
+      - AKRI_RASTA_LOCAL_PORT_CHANNEL1=9999
+      - AKRI_RASTA_MD4=HALF_SAFETYCODE
+      - AKRI_RASTA_MD4_START00=0x67452301
+      - AKRI_RASTA_MD4_START01=0xEFCDAB89
+      - AKRI_RASTA_MD4_START02=0x98BADCFE
+      - AKRI_RASTA_MD4_START03=0x10325476
+      - AKRI_RASTA_MWA=10
+      - AKRI_RASTA_N_DEFER_QUEUE_SIZE=2
+      - AKRI_RASTA_N_DIAGNOSIS=100
+      - AKRI_RASTA_N_DIAG_WINDOW=5000
+      - AKRI_RASTA_N_MAX_PACKET=3
+      - AKRI_RASTA_N_SENDMAX=20
+      - AKRI_RASTA_RASTA_LOCAL_ID=97
+      - AKRI_RASTA_RASTA_NETWORK=1234
+      - AKRI_RASTA_RASTA_REMOTE_ID=98
+      - AKRI_RASTA_RASTA_VERSION=0303
+      - AKRI_RASTA_RECEIVER_ID=SIGNAL
+      - AKRI_RASTA_REMOTE_PORT_CHANNEL0=8888
+      - AKRI_RASTA_REMOTE_PORT_CHANNEL1=8889
+      - AKRI_RASTA_SENDER_ID=INTERLOCKING
+      - AKRI_RASTA_TH=2000
+      - AKRI_RASTA_TMAX=10000
+      - AKRI_RASTA_TRANSPORT_CNT=1
+      - AKRI_RASTA_T_SEQ=50
+
+  signal:
+    image: reg.osmhpi.de/iotlab/simulators/light-signal:main-8d9f4662ca03b4e1964b728e0c443ee60c3a7329
+    hostname: signal
+    ports:
+      - 5100:80
+      - 5122:2222
+    networks:
+      default:
+        ipv4_address: 10.152.1.20
+
+  signal_bridge:
+    network_mode: service:signal
+    image: reg.osmhpi.de/iotlab/rasta-bridge-uni-passau:rasta-bridge-5030b6689b532609942e51dffd544c72d424ab8c
+    entrypoint: []
+    command: ["sh", "-c", "while true; do ./entrypoint ; done"]
+    environment:
+      - AKRI_RASTA_CRC_CODE=NO_CHECKSUM
+      - AKRI_RASTA_HOST=10.152.1.10
+      - AKRI_RASTA_LOCAL_PORT_CHANNEL0=8888
+      - AKRI_RASTA_LOCAL_PORT_CHANNEL1=8889
+      - AKRI_RASTA_MD4=HALF_SAFETYCODE
+      - AKRI_RASTA_MD4_START00=0x67452301
+      - AKRI_RASTA_MD4_START01=0xEFCDAB89
+      - AKRI_RASTA_MD4_START02=0x98BADCFE
+      - AKRI_RASTA_MD4_START03=0x10325476
+      - AKRI_RASTA_MWA=10
+      - AKRI_RASTA_N_DEFER_QUEUE_SIZE=2
+      - AKRI_RASTA_N_DIAGNOSIS=100
+      - AKRI_RASTA_N_DIAG_WINDOW=5000
+      - AKRI_RASTA_N_MAX_PACKET=3
+      - AKRI_RASTA_N_SENDMAX=20
+      - AKRI_RASTA_RASTA_LOCAL_ID=98
+      - AKRI_RASTA_RASTA_NETWORK=1234
+      - AKRI_RASTA_RASTA_REMOTE_ID=97
+      - AKRI_RASTA_RASTA_VERSION=0303
+      - AKRI_RASTA_RECEIVER_ID=INTERLOCKING
+      - AKRI_RASTA_REMOTE_PORT_CHANNEL0=9998
+      - AKRI_RASTA_REMOTE_PORT_CHANNEL1=9999
+      - AKRI_RASTA_SENDER_ID=SIGNAL
+      - AKRI_RASTA_TH=2000
+      - AKRI_RASTA_TMAX=10000
+      - AKRI_RASTA_TRANSPORT_CNT=1
+      - AKRI_RASTA_T_SEQ=50

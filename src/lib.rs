@@ -4,10 +4,13 @@ pub mod control_station;
 pub mod driveway;
 pub mod point;
 pub mod signal;
+pub mod vacancy_section;
+
+#[cfg(feature = "grpc_signal")]
+pub mod grpc_signal;
 
 #[cfg(test)]
 mod test;
-pub mod vacancy_section;
 
 #[derive(Debug)]
 pub enum TrackElementError {
