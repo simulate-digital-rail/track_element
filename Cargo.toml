@@ -7,13 +7,14 @@ edition = "2021"
 
 [features]
 default = ["grpc_signal"]
-grpc_signal = ["tonic", "prost"]
+grpc_signal = ["tonic", "prost", "sci-rs"]
 
 [dependencies]
 serde_json = "1.0.87"
 anyhow = "1.0.66"
 tonic = { version = "0.9.2", optional = true }
 prost = { version = "0.11.9", optional = true }
+sci-rs = { git = "https://github.com/ctiedt/rasta-rs", optional = true}
 
 [build-dependencies]
 tonic-build = { version = "0.9.2" }

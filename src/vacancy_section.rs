@@ -11,7 +11,7 @@ pub enum VacancySectionState {
     Free,
     Occupied,
     CommunicationError,
-    Disturbed
+    Disturbed,
 }
 
 #[derive(Debug)]
@@ -63,9 +63,8 @@ impl TrackElement for VacancySection {
         self.state = new_state;
         for signal in &self.previous_signals {
             let mut signal = signal.write().unwrap();
-            match new_state {
-                VacancySectionState::Occupied => signal.set_state(MainSignalState::Hp0.into())?,
-                _ => (),
+            if let VacancySectionState::Occupied = new_state {
+                signal.set_state(MainSignalState::Hp0.into())?
             }
         }
         Ok(())

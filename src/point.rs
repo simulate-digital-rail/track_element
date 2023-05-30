@@ -2,16 +2,11 @@ use std::sync::{Arc, RwLock};
 
 use crate::{TrackElement, TrackElementError};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum PointState {
+    #[default]
     Left,
     Right,
-}
-
-impl Default for PointState {
-    fn default() -> Self {
-        PointState::Left
-    }
 }
 
 #[derive(Debug)]

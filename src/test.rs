@@ -103,8 +103,8 @@ fn set_conflicting_driveway() {
             ],
             Vec::new(),
         ),
-        s1.clone(),
-        s2.clone(),
+        s1,
+        s2,
     )));
     let mut dw2 = Driveway::new(
         vec![dw1.clone()],
@@ -116,8 +116,8 @@ fn set_conflicting_driveway() {
             ],
             Vec::new(),
         ),
-        s12.clone(),
-        s22.clone(),
+        s12,
+        s22,
     );
 
     dw1.write().unwrap().set_way().unwrap();

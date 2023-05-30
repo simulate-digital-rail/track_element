@@ -1,6 +1,6 @@
 use crate::{signal::SignalState, TrackElement};
 
-mod sci_message;
+use sci_rs::SCITelegram;
 
 mod sci {
     tonic::include_proto!("sci");
